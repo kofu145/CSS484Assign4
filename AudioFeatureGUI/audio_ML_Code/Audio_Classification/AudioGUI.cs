@@ -10,10 +10,13 @@ using System.Drawing;
 using System.Linq;
 using System.Security.Policy;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 using WMPLib;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace Audio_Classification
 {
@@ -44,6 +47,8 @@ namespace Audio_Classification
             
             obtainFrequency(musicAudioFiles, speechAudioFiles);
             obtainFreqDomain(frqMatrixMusic, frqMatrixSpeech);
+            
+            exportJson();
         }
 
         /*
@@ -176,6 +181,67 @@ namespace Audio_Classification
             // speech file processing
             aeSpeech = features.averageEnergy(speechFiles);
             zcrSpeech = features.zeroCrossingRate(speechFiles);
+        }
+
+        private void exportJson()
+        {
+            /*
+             * Amplitude: ampMatrixMusic, ampMatrixSpeech (2d list of doubles)
+             * Average Energy: aeMusic, aeSpeech (list of doubles)
+             * Zero crossing rage: zcrMusic, zcrSpeech (List of doubles)
+             * Frequency: frqMatrixMusic, frqMatrixSpeech (List<List<(double frequency, double magnitude)>>)
+             * Spectroid: scMusic, scSpeech (list of doubles)
+             */
+
+            var export = new Dictionary<string, FeatureModel>();
+
+            int count = 0;
+            foreach (string fileName in musicAudioFiles)
+            {
+                FeatureModel featureModel = new FeatureModel();
+                featureModel.Amplitude = ampMatrixMusic[count];
+                featureModel.AverageEnergy = aeMusic[count];
+                featureModel.ZeroCrossRange = zcrMusic[count];
+                List<FrequencyModel> matrix = new List<FrequencyModel>();
+                foreach (var obj in frqMatrixMusic[count])
+                {
+                    var freqModel = new FrequencyModel();
+                    freqModel.Frequency = obj.frequency;
+                    freqModel.Magnitude = obj.magnitude;
+                    matrix.Add(freqModel);
+                }
+                featureModel.FrequencyMatrix = matrix;
+                featureModel.SpectralCentroid = scMusic[count];
+                featureModel.IsMusic = true;
+                export[fileName] = featureModel;
+                count++;
+            }
+
+            count = 0;
+            foreach (string fileName in speechAudioFiles)
+            {
+                FeatureModel featureModel = new FeatureModel();
+                featureModel.Amplitude = ampMatrixSpeech[count];
+                featureModel.AverageEnergy = aeSpeech[count];
+                featureModel.ZeroCrossRange = zcrSpeech[count];
+                List<FrequencyModel> matrix = new List<FrequencyModel>();
+                foreach (var obj in frqMatrixSpeech[count])
+                {
+                    var freqModel = new FrequencyModel();
+                    freqModel.Frequency = obj.frequency;
+                    freqModel.Magnitude = obj.magnitude;
+                    matrix.Add(freqModel);
+                }
+                featureModel.FrequencyMatrix = matrix;
+                featureModel.SpectralCentroid = scSpeech[count];
+                featureModel.IsMusic = false;
+                export[fileName] = featureModel;
+                count++;
+            }
+            
+            string json = JsonConvert.SerializeObject(export, Formatting.Indented);
+
+            File.WriteAllText("./export.json", json);
         }
     }
 }
