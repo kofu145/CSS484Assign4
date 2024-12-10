@@ -10,12 +10,34 @@ public class FeatureModel
      * Spectroid: scMusic, scSpeech (list of doubles)
      */
 
-    public List<double> Amplitude;
+    public double Amplitude;
     public double AverageEnergy;
     public double ZeroCrossRange;
-    public List<FrequencyModel> FrequencyMatrix;
+    public double Bandwidth;
     public double SpectralCentroid;
     public bool IsMusic;
+    
+    // Root Mean Square  
+    public double RMS_Value(List<double> arr)
+    {
+        int n = arr.Count;
+        int square = 0;
+        double mean, root = 0;            
+ 
+        // Calculate square
+        for (int i = 0; i < n; i++)
+        {
+            square += (int)Math.Pow(arr[i], 2);
+        }
+ 
+        // Calculate Mean
+        mean = (square / (double)(n));
+ 
+        // Calculate Root
+        root = (double)Math.Sqrt(mean);
+ 
+        return root;
+    }
 }
 
 public class FrequencyModel

@@ -194,26 +194,28 @@ namespace Audio_Classification
              */
 
             var export = new Dictionary<string, FeatureModel>();
+            var csvString = "file_name,avg_energy,zero_cross_range,bandwidth,spectral_centroid,label" + Environment.NewLine;
 
             int count = 0;
             foreach (string fileName in musicAudioFiles)
             {
                 FeatureModel featureModel = new FeatureModel();
-                featureModel.Amplitude = ampMatrixMusic[count];
+                featureModel.Amplitude = featureModel.RMS_Value(ampMatrixMusic[count]);
                 featureModel.AverageEnergy = aeMusic[count];
                 featureModel.ZeroCrossRange = zcrMusic[count];
-                List<FrequencyModel> matrix = new List<FrequencyModel>();
-                foreach (var obj in frqMatrixMusic[count])
-                {
-                    var freqModel = new FrequencyModel();
-                    freqModel.Frequency = obj.frequency;
-                    freqModel.Magnitude = obj.magnitude;
-                    matrix.Add(freqModel);
-                }
-                featureModel.FrequencyMatrix = matrix;
+                featureModel.Bandwidth = 
+                    frqMatrixMusic[count].Where(e => e.frequency > 0).Max().frequency - 
+                    frqMatrixMusic[count].Where(e => e.frequency > 3).Min().frequency;
                 featureModel.SpectralCentroid = scMusic[count];
                 featureModel.IsMusic = true;
                 export[fileName] = featureModel;
+
+                csvString += $"{fileName}," +
+                             $"{featureModel.AverageEnergy}," +
+                             $"{featureModel.ZeroCrossRange}," +
+                             $"{featureModel.Bandwidth}," +
+                             $"{featureModel.SpectralCentroid}," +
+                             $"{featureModel.IsMusic}" + Environment.NewLine;
                 count++;
             }
 
@@ -221,27 +223,28 @@ namespace Audio_Classification
             foreach (string fileName in speechAudioFiles)
             {
                 FeatureModel featureModel = new FeatureModel();
-                featureModel.Amplitude = ampMatrixSpeech[count];
+                featureModel.Amplitude = featureModel.RMS_Value(ampMatrixSpeech[count]);
                 featureModel.AverageEnergy = aeSpeech[count];
                 featureModel.ZeroCrossRange = zcrSpeech[count];
-                List<FrequencyModel> matrix = new List<FrequencyModel>();
-                foreach (var obj in frqMatrixSpeech[count])
-                {
-                    var freqModel = new FrequencyModel();
-                    freqModel.Frequency = obj.frequency;
-                    freqModel.Magnitude = obj.magnitude;
-                    matrix.Add(freqModel);
-                }
-                featureModel.FrequencyMatrix = matrix;
+                featureModel.Bandwidth = 
+                    frqMatrixSpeech[count].Where(e => e.frequency > 0).Max().frequency - 
+                    frqMatrixSpeech[count].Where(e => e.frequency > 0).Min().frequency;
                 featureModel.SpectralCentroid = scSpeech[count];
                 featureModel.IsMusic = false;
                 export[fileName] = featureModel;
+                csvString += $"{fileName}," +
+                             $"{featureModel.AverageEnergy}," +
+                             $"{featureModel.ZeroCrossRange}," +
+                             $"{featureModel.Bandwidth}," +
+                             $"{featureModel.SpectralCentroid}," +
+                             $"{featureModel.IsMusic}" + Environment.NewLine;
                 count++;
             }
             
             string json = JsonConvert.SerializeObject(export, Formatting.Indented);
 
             File.WriteAllText("./export.json", json);
+            File.WriteAllText("./export.csv", csvString);
         }
     }
 }
