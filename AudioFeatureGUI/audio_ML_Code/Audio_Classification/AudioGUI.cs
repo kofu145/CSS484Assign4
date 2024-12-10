@@ -200,7 +200,7 @@ namespace Audio_Classification
             foreach (string fileName in musicAudioFiles)
             {
                 FeatureModel featureModel = new FeatureModel();
-                featureModel.Amplitude = featureModel.RMS_Value(ampMatrixMusic[count]);
+                //featureModel.Amplitude = featureModel.RMS_Value(ampMatrixMusic[count]);
                 featureModel.AverageEnergy = aeMusic[count];
                 featureModel.ZeroCrossRange = zcrMusic[count];
                 featureModel.Bandwidth = 
@@ -223,7 +223,7 @@ namespace Audio_Classification
             foreach (string fileName in speechAudioFiles)
             {
                 FeatureModel featureModel = new FeatureModel();
-                featureModel.Amplitude = featureModel.RMS_Value(ampMatrixSpeech[count]);
+                //featureModel.Amplitude = featureModel.RMS_Value(ampMatrixSpeech[count]);
                 featureModel.AverageEnergy = aeSpeech[count];
                 featureModel.ZeroCrossRange = zcrSpeech[count];
                 featureModel.Bandwidth = 

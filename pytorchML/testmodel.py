@@ -11,21 +11,9 @@ from enum import Enum
 from pytorch_lightning import LightningModule, Trainer
 from torchmetrics import Accuracy
 import copy
-# Ignore warnings
-import warnings
-warnings.filterwarnings("ignore")
 
 df = pd.read_csv("export.csv")
-my_df = pd.read_csv("./export.csv")
 
-my_df["label"] = my_df["label"].replace(True, 1)
-my_df["label"] = my_df["label"].replace(False, 0)
-
-df["label"] = df["label"].replace(True, 1)
-df["label"] = df["label"].replace(False, 0)
-
-pred_res = []
-results = []
 class DatasetType(Enum):
     TRAIN = 1
     TEST = 2
@@ -33,7 +21,7 @@ class DatasetType(Enum):
 
 class CustomDataset(Dataset):
     def __init__(self):
-        self.df=df.sample(frac=1, random_state=27)
+        self.df=pd.read_csv("export.csv").sample(frac=1, random_state=27)
         train_split=0.6
         val_split=0.8
         self.df_labels=df['label']
@@ -60,7 +48,7 @@ class CustomDataset(Dataset):
             self.dataset,self.labels=self.val,self.val_labels
 
 
-        self.dataset=torch.tensor(self.scaler.transform(self.dataset)).double()
+        self.dataset=torch.tensor(self.scaler.transform(self.dataset)).float()
         self.labels=torch.tensor(self.labels.to_numpy().reshape(-1)).long()
 
         return self
@@ -97,7 +85,6 @@ class SimpleModel(LightningModule):
             nn.Linear(32, classes),
         )
         self.accuracy = Accuracy(task='multiclass', num_classes=2)
-        self.double()
     def forward(self, x):
         x = self.model(x)
         return F.log_softmax(x, dim=1)
@@ -114,10 +101,7 @@ class SimpleModel(LightningModule):
         logits = self(x)
         loss = F.nll_loss(logits, y)
         preds = torch.argmax(logits, dim=1)
-        pred_res.append(preds)
-        results.append(y)
         self.accuracy(preds, y)
-        
 
         self.log(f"{print_str}_loss", loss, prog_bar=True)
         self.log(f"{print_str}_acc", self.accuracy, prog_bar=True)
@@ -129,9 +113,6 @@ class SimpleModel(LightningModule):
     
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.001)
-    
-    def predict_step(self, batch, batch_idx, dataloader_idx=0):
-        return self(batch)
     #
     # HERE: We define the 3 Dataloaders, only train needs to be shuffled
     # This will then directly be usable with Pytorch Lightning to make a super quick model
@@ -143,42 +124,23 @@ class SimpleModel(LightningModule):
 
     def test_dataloader(self):
         return DataLoader(self.test_ds, batch_size=BATCH_SIZE,shuffle=False)
-
-# Start the Trainer
-trainer = Trainer(
-    max_epochs=10)
-# Define the Model
+    
 model=SimpleModel(train,test,val)
-# Train the Model
-trainer.fit(model)
-# Test on the Test SET, it will print validation
-x = trainer.test()
-print(x)
-torch.save(model.state_dict(), "testmodel.pt")
+model.load_state_dict(torch.load("./testmodel.pt"))
+model.eval()
 
-for i in range(len(pred_res)):
-    print(f"{pred_res[i]} : {results[i]}")
-pred_res = []
-results = []
-
-trainer.validate()
-for i in range(len(pred_res)):
-    print(f"{pred_res[i]} : {results[i]}")
-""""
-test_set = torch.tensor(my_df.drop(columns=["file_name", "label"]).values)
+my_df = pd.read_csv("./export.csv")
+test = torch.tensor(my_df.drop(columns=["file_name", "label"]).values)
 y_res = torch.LongTensor(my_df["label"])
 
-model.eval()
-predictions = trainer.predict(model, DataLoader(test_set, batch_size=1, shuffle=False))
-print(predictions)
-
 correct = 0
-for i, data in enumerate(predictions):
+with torch.no_grad():
+    for i, data in enumerate(test):
+        y_val = model(data)
 
-    # type of speech/music
-    print(f"{i+1}.) {str(predictions[i])}      {y_res[i]} \t {predictions[i].argmax().item()}")
+        # type of speech/music
+        print(f"{i+1}.) {str(y_val)}      {y_res[i]} \t {y_val.argmax().item()}")
 
-    if predictions[i].argmax().item() == y_res[i]:
-        correct += 1
-
-print(correct)"""
+        if y_val.argmax().item() == y_res[i]:
+            correct += 1
+print(correct)
