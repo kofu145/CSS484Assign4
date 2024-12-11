@@ -115,27 +115,22 @@ namespace Audio_Classification
         {
             // Display a message box with Yes and No buttons
             DialogResult result = MessageBox.Show(
-                "Which file would you like to export to? (Click \"Yes\" for CSV file and \"No\" for JSON file)", 
-                "Output Source",             
+                "Do you want to proceed exporting the specified files?", 
+                "Confirmation",             
                 MessageBoxButtons.YesNo,    
                 MessageBoxIcon.Question     
             );
 
             if (result == DialogResult.Yes)
             {
-                string excelPath = Path.GetFullPath("excel.exe");
-                string excelCSV = Path.GetFullPath("export.csv");
+                exportJson();
+                string directorySource = Path.GetFullPath("export.csv");
 
-                // opens csv file in notepad
-                System.Diagnostics.Process.Start(excelPath, excelCSV);
+                MessageBox.Show("FIles can be found in directory path below:\n\n" + directorySource.Substring(0, directorySource.Length - 10));
             }
             else
             {
-                string notePath = Path.GetFullPath("notepad.exe");
-                string json = Path.GetFullPath("export.json");
-
-                // opens json file in notepad
-                System.Diagnostics.Process.Start(notePath, json);
+                return;
             }
         }
 
