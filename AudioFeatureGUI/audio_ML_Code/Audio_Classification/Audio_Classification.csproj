@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +28,7 @@
       <Isolated>false</Isolated>
     </COMReference>
   </ItemGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="AForge.Math" Version="2.2.5" />
     <PackageReference Include="NAudio" Version="2.2.1" />
