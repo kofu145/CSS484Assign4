@@ -49,7 +49,7 @@ namespace Audio_Classification
             obtainFrequency(musicAudioFiles, speechAudioFiles);
             obtainFreqDomain(frqMatrixMusic, frqMatrixSpeech);
 
-            exportJson();
+            //exportJson();
         }
 
 
