@@ -31,28 +31,26 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AudioGUI));
             lstBox = new ListBox();
             gboAudioSelector = new GroupBox();
+            gboExport = new GroupBox();
+            btnExport = new Button();
+            gboFilters = new GroupBox();
             rBtnMusic = new RadioButton();
             rBtnSpeech = new RadioButton();
             MediaPlayer = new AxWMPLib.AxWindowsMediaPlayer();
             lblFileName = new Label();
             waveViewer1 = new NAudio.Gui.WaveViewer();
             lblWaveLength = new Label();
-            gboAudioMethods = new GroupBox();
-            gboFilters = new GroupBox();
-            button1 = new Button();
-            button2 = new Button();
-            button3 = new Button();
             gboAudioSelector.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)MediaPlayer).BeginInit();
-            gboAudioMethods.SuspendLayout();
+            gboExport.SuspendLayout();
             gboFilters.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)MediaPlayer).BeginInit();
             SuspendLayout();
             // 
             // lstBox
             // 
             lstBox.FormattingEnabled = true;
             lstBox.ItemHeight = 15;
-            lstBox.Location = new Point(36, 158);
+            lstBox.Location = new Point(36, 160);
             lstBox.Name = "lstBox";
             lstBox.Size = new Size(200, 184);
             lstBox.TabIndex = 0;
@@ -62,12 +60,43 @@
             // 
             gboAudioSelector.Controls.Add(gboFilters);
             gboAudioSelector.Controls.Add(lstBox);
-            gboAudioSelector.Location = new Point(588, 51);
+            gboAudioSelector.Location = new Point(588, 138);
             gboAudioSelector.Name = "gboAudioSelector";
-            gboAudioSelector.Size = new Size(272, 360);
+            gboAudioSelector.Size = new Size(272, 367);
             gboAudioSelector.TabIndex = 1;
             gboAudioSelector.TabStop = false;
             gboAudioSelector.Text = "Audio File Selection";
+            // 
+            // gboExport
+            // 
+            gboExport.Controls.Add(btnExport);
+            gboExport.Location = new Point(588, 51);
+            gboExport.Name = "gboExport";
+            gboExport.Size = new Size(272, 81);
+            gboExport.TabIndex = 8;
+            gboExport.TabStop = false;
+            gboExport.Text = "Export to File";
+            // 
+            // btnExport
+            // 
+            btnExport.Location = new Point(62, 22);
+            btnExport.Name = "btnExport";
+            btnExport.Size = new Size(143, 48);
+            btnExport.TabIndex = 0;
+            btnExport.Text = "Export JSON and CSV";
+            btnExport.UseVisualStyleBackColor = true;
+            btnExport.Click += btnExport_Click;
+            // 
+            // gboFilters
+            // 
+            gboFilters.Controls.Add(rBtnMusic);
+            gboFilters.Controls.Add(rBtnSpeech);
+            gboFilters.Location = new Point(36, 38);
+            gboFilters.Name = "gboFilters";
+            gboFilters.Size = new Size(200, 100);
+            gboFilters.TabIndex = 2;
+            gboFilters.TabStop = false;
+            gboFilters.Text = "File Filter";
             // 
             // rBtnMusic
             // 
@@ -133,62 +162,12 @@
             lblWaveLength.TabIndex = 6;
             lblWaveLength.Text = "Wavelength Visual";
             // 
-            // gboAudioMethods
-            // 
-            gboAudioMethods.Controls.Add(button3);
-            gboAudioMethods.Controls.Add(button2);
-            gboAudioMethods.Controls.Add(button1);
-            gboAudioMethods.Location = new Point(866, 51);
-            gboAudioMethods.Name = "gboAudioMethods";
-            gboAudioMethods.Size = new Size(200, 164);
-            gboAudioMethods.TabIndex = 7;
-            gboAudioMethods.TabStop = false;
-            gboAudioMethods.Text = "Audio Methods";
-            // 
-            // gboFilters
-            // 
-            gboFilters.Controls.Add(rBtnMusic);
-            gboFilters.Controls.Add(rBtnSpeech);
-            gboFilters.Location = new Point(36, 34);
-            gboFilters.Name = "gboFilters";
-            gboFilters.Size = new Size(200, 100);
-            gboFilters.TabIndex = 2;
-            gboFilters.TabStop = false;
-            gboFilters.Text = "File Filter";
-            // 
-            // button1
-            // 
-            button1.Location = new Point(66, 30);
-            button1.Name = "button1";
-            button1.Size = new Size(75, 23);
-            button1.TabIndex = 0;
-            button1.Text = "button1";
-            button1.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            button2.Location = new Point(66, 79);
-            button2.Name = "button2";
-            button2.Size = new Size(75, 23);
-            button2.TabIndex = 1;
-            button2.Text = "button2";
-            button2.UseVisualStyleBackColor = true;
-            // 
-            // button3
-            // 
-            button3.Location = new Point(66, 125);
-            button3.Name = "button3";
-            button3.Size = new Size(75, 23);
-            button3.TabIndex = 2;
-            button3.Text = "button3";
-            button3.UseVisualStyleBackColor = true;
-            // 
             // AudioGUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1078, 463);
-            Controls.Add(gboAudioMethods);
+            ClientSize = new Size(931, 530);
+            Controls.Add(gboExport);
             Controls.Add(lblWaveLength);
             Controls.Add(waveViewer1);
             Controls.Add(lblFileName);
@@ -198,10 +177,10 @@
             Text = "Audio Classification";
             Load += AudioGUI_Load;
             gboAudioSelector.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)MediaPlayer).EndInit();
-            gboAudioMethods.ResumeLayout(false);
+            gboExport.ResumeLayout(false);
             gboFilters.ResumeLayout(false);
             gboFilters.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)MediaPlayer).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -214,12 +193,12 @@
         private RadioButton rBtnSpeech;
         private AxWMPLib.AxWindowsMediaPlayer MediaPlayer;
         private Label lblFileName;
-        private Button button1;
         private NAudio.Gui.WaveViewer waveViewer1;
         private Label lblWaveLength;
         private GroupBox gboFilters;
-        private GroupBox gboAudioMethods;
+        private GroupBox gboExport;
         private Button button3;
         private Button button2;
+        private Button btnExport;
     }
 }

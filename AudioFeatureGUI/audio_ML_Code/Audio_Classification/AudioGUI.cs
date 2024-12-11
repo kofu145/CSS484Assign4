@@ -2,6 +2,7 @@
 using NAudio.Gui;
 using NAudio.Wave;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,9 +15,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
-using WMPLib;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
+using System.Reflection;
 
 namespace Audio_Classification
 {
@@ -44,12 +45,13 @@ namespace Audio_Classification
 
             obtainAmplitude(musicAudioFiles, speechAudioFiles);
             obtainTimeDomain(ampMatrixMusic, ampMatrixSpeech);
-            
+
             obtainFrequency(musicAudioFiles, speechAudioFiles);
             obtainFreqDomain(frqMatrixMusic, frqMatrixSpeech);
-            
+
             exportJson();
         }
+
 
         /*
          * changes between filters and their respective files
@@ -88,16 +90,19 @@ namespace Audio_Classification
 
                 string file = "";
 
+                // shows approriate files specified from radio button
                 if (rBtnMusic.Checked)
                     file = Path.GetFullPath(musicAudioFiles[index]);
                 else
                     file = Path.GetFullPath(speechAudioFiles[index]);
 
+                // diplays visualization using the NAudio
                 if (rBtnMusic.Checked)
                     waveViewer1.WaveStream = new NAudio.Wave.WaveFileReader(Path.GetFullPath(musicAudioFiles[index]));
                 else
                     waveViewer1.WaveStream = new NAudio.Wave.WaveFileReader(Path.GetFullPath(speechAudioFiles[index]));
 
+                // Sets the URL to file path for the media player to play file
                 MediaPlayer.URL = file;
             }
             catch (Exception ex)
@@ -106,6 +111,33 @@ namespace Audio_Classification
             }
         }
 
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            // Display a message box with Yes and No buttons
+            DialogResult result = MessageBox.Show(
+                "Which file would you like to export to? (Click \"Yes\" for CSV file and \"No\" for JSON file)", 
+                "Output Source",             
+                MessageBoxButtons.YesNo,    
+                MessageBoxIcon.Question     
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                string excelPath = Path.GetFullPath("excel.exe");
+                string excelCSV = Path.GetFullPath("export.csv");
+
+                // opens csv file in notepad
+                System.Diagnostics.Process.Start(excelPath, excelCSV);
+            }
+            else
+            {
+                string notePath = Path.GetFullPath("notepad.exe");
+                string json = Path.GetFullPath("export.json");
+
+                // opens json file in notepad
+                System.Diagnostics.Process.Start(notePath, json);
+            }
+        }
 
         /*
          * Amplitude retrieval of audio files OG
@@ -117,7 +149,7 @@ namespace Audio_Classification
             foreach (string fileName in musicFiles)
             {
                 AudioFeatures features = new AudioFeatures();
-                List <double> temp = features.GetAmplitude(fileName);
+                List<double> temp = features.GetAmplitude(fileName);
                 ampMatrixMusic.Add(temp);
             }
 
@@ -168,10 +200,10 @@ namespace Audio_Classification
          */
         List<double> aeMusic = new List<double>();
         List<double> aeSpeech = new List<double>();
-        
+
         List<double> zcrMusic = new List<double>();
         List<double> zcrSpeech = new List<double>();
-        private void obtainTimeDomain(List <List <double>> musicFiles, List<List <double>> speechFiles)
+        private void obtainTimeDomain(List<List<double>> musicFiles, List<List<double>> speechFiles)
         {
             // music file processing
             AudioFeatures features = new AudioFeatures();
@@ -203,8 +235,8 @@ namespace Audio_Classification
                 //featureModel.Amplitude = featureModel.RMS_Value(ampMatrixMusic[count]);
                 featureModel.AverageEnergy = aeMusic[count];
                 featureModel.ZeroCrossRange = zcrMusic[count];
-                featureModel.Bandwidth = 
-                    frqMatrixMusic[count].Where(e => e.frequency > 0).Max().frequency - 
+                featureModel.Bandwidth =
+                    frqMatrixMusic[count].Where(e => e.frequency > 0).Max().frequency -
                     frqMatrixMusic[count].Where(e => e.frequency > 3).Min().frequency;
                 featureModel.SpectralCentroid = scMusic[count];
                 featureModel.IsMusic = true;
@@ -226,8 +258,8 @@ namespace Audio_Classification
                 //featureModel.Amplitude = featureModel.RMS_Value(ampMatrixSpeech[count]);
                 featureModel.AverageEnergy = aeSpeech[count];
                 featureModel.ZeroCrossRange = zcrSpeech[count];
-                featureModel.Bandwidth = 
-                    frqMatrixSpeech[count].Where(e => e.frequency > 0).Max().frequency - 
+                featureModel.Bandwidth =
+                    frqMatrixSpeech[count].Where(e => e.frequency > 0).Max().frequency -
                     frqMatrixSpeech[count].Where(e => e.frequency > 0).Min().frequency;
                 featureModel.SpectralCentroid = scSpeech[count];
                 featureModel.IsMusic = false;
@@ -240,7 +272,7 @@ namespace Audio_Classification
                              $"{featureModel.IsMusic}" + Environment.NewLine;
                 count++;
             }
-            
+
             string json = JsonConvert.SerializeObject(export, Formatting.Indented);
 
             File.WriteAllText("./export.json", json);

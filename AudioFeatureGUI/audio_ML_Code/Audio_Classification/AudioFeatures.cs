@@ -14,9 +14,6 @@ namespace Audio_Classification
 {
     internal class AudioFeatures
     {
-        private static string filePath;
-        private static List<string> musicFiles;
-        private static List<string> speechFiles;
         public AudioFeatures() {  }
 
         /*
@@ -26,7 +23,6 @@ namespace Audio_Classification
         {
             List<(double frequency, double magnitude)> frqMag = new List<(double frequency, double magnitude)>();
 
-            // Load audio file using NAudio
             using (var reader = new AudioFileReader(filePath))
             {
                 // Get the sample rate of the audio file
@@ -39,9 +35,9 @@ namespace Audio_Classification
                 // Read the audio samples into the buffer
                 int samplesRead = reader.Read(sampleBuffer, 0, totalSamples);
 
-                // Ensure the data length is adjusted to the next power of 2 within bounds
+
                 double logLength = Math.Ceiling(Math.Log(samplesRead, 2.0));
-                int paddedLength = (int)Math.Pow(2.0, Math.Min(Math.Max(1.0, logLength), 14.0)); // Cap at 2^14 = 16384
+                int paddedLength = (int)Math.Pow(2.0, Math.Min(Math.Max(1.0, logLength), 14.0)); // Ensures power of two
 
                 // Create a complex array to hold the FFT input data
                 AForge.Math.Complex[] complexData = new AForge.Math.Complex[paddedLength];
@@ -99,7 +95,6 @@ namespace Audio_Classification
         {
             List<double> amplitudes = new List<double>();
 
-            // Open the audio file
             using (var reader = new AudioFileReader(filePath))
             {
                 // Create a buffer to store the samples
